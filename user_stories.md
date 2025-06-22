@@ -1,55 +1,49 @@
 # User Story Template
 **Title:**
-As a Admin,, I want to log into my portal with my username and password , so that i can manage the platform securely.
+As a Admin, I want to log into my portal with my username and password , so that i can manage the platform .
 **Acceptance Criteria:**
-- Login form accepts username and password.
-- Authentication is handled using Spring Security.
-- Admin credentials are stored securely in the database.
-- On success, admin is redirected to the dashboard.
-- On failure, an error message is shown.
+- Login  acceptes  with credentials such as username and password.
+- By using Spring Security we  handles authentication.
+- DBMS is being use to store admin credentials.
+- after redirecting the dashboard then we will  get confimation of success.
+-  an error message is being  prompt failure of login by admin. 
 
-**Priority:** [High/Medium/Low]
+**Priority:** [High]
 **Story Points:**
- -[ ] Create login form.
-- [ ] Implement Spring Security config for admin role.
-- [ ] Connect to database for credential validation.
-- [ ] Add success/failure redirects.
+ -[ ] login form will be create .
+- [ ] Spring Security config for admin role will be implemented.
+- [ ] credential validation will be connect with database.
+- [ ]  success/failure redirects will be added.
 
 
 - ### User Story
 As an admin, I want to log out of the portal to protect system access.
 
 ### Acceptance Criteria
-- Logout button is visible on the dashboard.
-- Clicking logout invalidates the session and redirects to login page.
-- Any further access requires re-login.
+-  visibility of logout buttom  on the dashboard.
+- on invalidates the session and redirects to login page by clic of logout.
+- when we will  re-login then further access will be peority.
 
 ### Tasks
-- [ ] Add logout endpoint using Spring Security.
-- [ ] Display logout button on admin dashboard.
-- [ ] Redirect user after logout.
+- [ ]  By use of  Spring Security we add logout endpoint .
+- [ ]  on admin dashboard prompt logout dashboard.
+- [ ]  after logout we redirected the user.
+
  ### User Story
 As an admin, I want to add a doctor with relevant details so that they can provide services on the platform.
 
 ### Acceptance Criteria
-- Form collects doctor name, specialization, email, and phone.
-- Data is validated before submission.
-- Doctor is stored in the database.
-- Success message shown after adding.
+-  doctor name, specialization, email and phone will be collected by form.
+-  Before submission Data will be validated.
+- DBMS is use to store Doctor.
+-  after adding success massage will be prompt.
 
-### Tasks
-- [ ] Design add-doctor form (if using web UI).
-- [ ] Create Doctor model.
-- [ ] Add REST endpoint or controller to handle doctor creation.
-- [ ] Validate inputs using JSR-303.
-- [ ] Store doctor in database via JPA.
 ### User Story
-As an admin, I want to run a stored procedure in MySQL CLI to track the number of appointments per month for usage statistics.
-
+As an admin, I want to run a stored procedure in MySQL CLI to track the number of appointments per month .
 ### Acceptance Criteria
-- Stored procedure accepts a year as input.
-- Returns appointment counts grouped by month.
-- Procedure is documented for use in CLI or backend.
+-  a year as input accepted by stored procedure.
+- Returns appointment counts grouped by month for Returning appointment.
+-   CLI uses documented by procedure .
 
 ### Tasks
 - [ ] Write SQL stored procedure:
@@ -70,156 +64,109 @@ As an admin, I want to run a stored procedure in MySQL CLI to track the number o
 As a patient, I want to view a list of doctors without logging in so that I can explore my options before registering.
 
 ### Acceptance Criteria
-- The doctor list is publicly accessible.
-- Each doctor displays name, specialization, and availability.
+- A list  of doctors are being publicly accessible.
+- Each doctor returns  department ,name,experience,  availability etc.
 - A call to action (e.g., "Register to Book") is visible.
 - No sensitive data is shown unless logged in.
 
-### Tasks
-- [ ] Create a public REST endpoint to fetch doctors.
-- [ ] Return doctor details (name, department, experience, etc.).
-- [ ] Display doctor info in the frontend without requiring login.
 
 ### User Story
 As a patient, I want to register with my email and password so that I can book appointments.
 
 ### Acceptance Criteria
-- Registration form includes email, password, and basic profile info.
-- Validations are enforced (email format, password strength).
-- User is saved to the database.
-- On success, user is redirected to login.
+- Registration form includes email, password, and basic profile info that create patient model entity.
+-  Spring Validations are enforced (email format, password strength).
+- user is redirected to login by implementing registration controller and form.
 
-### Tasks
-- [ ] Create `Patient` model/entity.
-- [ ] Implement registration controller and form.
-- [ ] Add validation with Spring Validation (JSR-303).
-- [ ] Encrypt password using BCrypt.
-- [ ] Store patient in the database.
 
 ### User Story
 As a patient, I want to log into the portal so that I can manage my appointment bookings.
 
 ### Acceptance Criteria
-- Patient can log in using email and password.
-- Redirects to a dashboard after login.
-- Patient sees appointment list and can manage (view/cancel).
+- by using email and password pratient can log into protal.
+- after redirecting the dashboard then we will  get confimation of success.
+- Patient view appointment list and  management processed .
 
-### Tasks
-- [ ] Setup Spring Security for patient role.
-- [ ] Create login form and configure authentication.
-- [ ] Add session tracking and role-based access.
-- [ ] Show patient-specific dashboard with appointments.
+
 ### User Story
 As a patient, I want to book an hour-long appointment with a doctor so that I can consult them at a scheduled time.
 
 ### Acceptance Criteria
-- Booking form shows doctor availability.
-- Patient selects date and hour-long time slot.
-- Booking is saved in the database.
-- Prevent overlapping bookings for same doctor/time.
+-  availability of doctor will be found in booking form to create appointment entity with doctorId, patientId, startTime, endTime .
+-  date and hour-long time slot will be selected by patient.
+-   DBMS is used to store booking.
+-  Bookings for same doctor/time preventing overlapping .
 
-### Tasks
-- [ ] Create appointment entity with doctorId, patientId, startTime, endTime.
-- [ ] Implement availability check logic.
-- [ ] Save appointment to database via JPA.
-- [ ] Show confirmation message on success.
 ### User Story
-As a patient, I want to view my upcoming appointments so that I can prepare accordingly.
+As a patient, I want to view my upcoming appointments so that I can prepare .
 
 ### Acceptance Criteria
-- List all future appointments for the logged-in patient.
-- Show date, time, doctor name, and purpose.
-- Sorted by nearest date.
+-  Create a REST endpoint `/api/patient/upcoming-appointments` by Listout all future appointments .
+-Query appointments where patientId = loggedInUser and date > today.
+- display date, time, doctor name, and purpose in tabular formate in frontend .
 
-### Tasks
-- [ ] Create a REST endpoint `/api/patient/upcoming-appointments`.
-- [ ] Query appointments where patientId = loggedInUser and date > today.
-- [ ] Display appointments in tabular format in frontend.
+
 ### User Story
-As a patient, I want to log out of the portal so that my session is closed securely.
+As a patient, I want to log out of the portal so that my session is closed .
 
 ### Acceptance Criteria
-- Logout button is visible once logged in.
-- Session is invalidated on logout.
-- Redirects to login or home page.
+- logout button on dashboard  once logged in.
+-  Handle session invalidation on logout.
+-  After redirecting the dashboard then we will  get confimation of success.
+   
 
-### Tasks
-- [ ] Add logout URL in Spring Security config.
-- [ ] Add logout link/button on dashboard.
-- [ ] Handle session invalidation.
 ### User Story
 As a doctor, I want to log into the portal with my credentials so that I can manage my appointments.
 
 ### Acceptance Criteria
-- Login form accepts doctor credentials.
-- Valid credentials redirect to the doctor dashboard.
-- Invalid login attempts display a clear error message.
-- Session is securely managed.
+- Login  acceptes  with user credentials to add login form and authentication endpoint.
+- on success Valid credentials redirect to the doctor dashboard.
+ -  display error message for attemting invalid login.
 
-### Tasks
-- [ ] Configure Spring Security for the `DOCTOR` role.
-- [ ] Add login form and authentication endpoint.
-- [ ] Redirect to `/doctor/dashboard` on success.
 ### User Story
 As a doctor, I want to log out of the portal so that my personal data and patient information remain protected.
 
 ### Acceptance Criteria
+ Login  acceptes  with user credentials to add login form and authentication endpoint.
 - Logout option is visible on doctor dashboard.
 - Session is invalidated on logout.
-- Redirects to login or home page.
 
-### Tasks
-- [ ] Implement logout handler with Spring Security.
-- [ ] Add logout link/button to frontend.
-- [ ] Confirm session is cleared after logout.
+
 ### User Story
 As a doctor, I want to view my appointment calendar so that I can stay organized and know my daily schedule.
 
 ### Acceptance Criteria
-- Calendar shows all upcoming appointments.
+-  displaying  all upcoming appointments by use of calender.
 - Each event includes time, patient name, and purpose.
-- Sorted by date and time.
+- Sorted by date and time Format response for calendar UI .
 
-### Tasks
-- [ ] Create API to fetch doctor's appointments.
-- [ ] Format response for calendar UI.
-- [ ] Integrate with frontend calendar component.
+
 ### User Story
 As a doctor, I want to mark days or time slots when I'm unavailable so that patients cannot book during that time.
 
 ### Acceptance Criteria
-- Form/UI allows selection of unavailable dates/times.
-- These slots are blocked in the appointment scheduler.
-- Stored in the database.
+- to create 'Unavialability ' entity/model by  allowing UI/form by selecting of unavailable dates/times.
+-  within appointment scheduler slots are being blocked .
+  - DBMS is used to store.
 
-### Tasks
-- [ ] Create `Unavailability` entity/model.
-- [ ] Provide form to add/remove unavailability.
-- [ ] Update appointment booking logic to exclude unavailable slots.
 ### User Story
 As a doctor, I want to update my profile with current specialization and contact information so that patients see accurate data.
 
 ### Acceptance Criteria
-- Form includes editable fields for name, specialization, phone, and email.
-- Validates inputs and updates the database.
-- Confirmation message shown after successful update.
+-  Fields for name, specialization, phone, and email includes in form.
+-  updates the database by use of validation input.
+- after successful update we can look Confirmation message.
 
-### Tasks
-- [ ] Add `/doctor/profile` endpoint.
-- [ ] Create update form with current data.
-- [ ] Implement validation and database update logic.
+
 ### User Story
 As a doctor, I want to view patient details for upcoming appointments so that I can prepare accordingly.
 
 ### Acceptance Criteria
-- Appointment view includes patient name, contact, medical history (optional).
-- Patient data is fetched securely with proper role checks.
-- Doctor cannot access unrelated patient data.
+- for updating  API  where Appointment view includes patient name, contact, medical history .
+- using role-based security Patient data is fetched securely .
+-  unrelated patient data can not accepted by Doctor.
 
-### Tasks
-- [ ] Update appointment API to include patient info.
-- [ ] Protect access using role-based security.
-- [ ] Display patient details on appointment page or popup.
+
 
 
   
