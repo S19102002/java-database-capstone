@@ -70,3 +70,95 @@
 
     If saving fails, show an error message
 */
+import { openModal } from '../utils/modal.js';
+import { getDoctors, saveDoctor, filterDoctors } from '../services/doctorServices.js';
+import { createDoctorCard } from '../components/doctorCard.js';
+
+const addDoctorBtn = document.getElementById('addDocBtn');
+const searchInput = document.getElementById('doctorSearchInput');
+const timeFilter = document.getElementById('timeFilter');
+const specialtyFilter = document.getElementById('specialtyFilter');
+const contentDiv = document.getElementById('content');
+
+if (addDoctorBtn) {
+  addDoctorBtn.addEventListener('click', () => {
+    openModal('addDoctor');
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadDoctorCards();
+  searchInput?.addEventListener('input', filterDoctorsOnChange);
+  timeFilter?.addEventListener('change', filterDoctorsOnChange);
+  specialtyFilter?.addEventListener('change', filterDoctorsOnChange);
+});
+
+// Load all doctor cards on page load
+async function loadDoctorCards() {
+  try {
+    const doctors = await getDoctors();
+    renderDoctorCards(doctors);
+  } catch (error) {
+    console.error("Error loading doctors:", error);
+  }
+}
+
+// Render doctor cards
+function renderDoctorCards(doctors) {
+  contentDiv.innerHTML = '';
+  doctors.forEach(doc => {
+    const card = createDoctorCard(doc);
+    contentDiv.appendChild(card);
+  });
+}
+
+// Filter doctors on any input change
+async function filterDoctorsOnChange() {
+  const name = searchInput?.value.trim() || null;
+  const time = timeFilter?.value || null;
+  const specialty = specialtyFilter?.value || null;
+
+  try {
+    const doctors = await filterDoctors(name, time, specialty);
+    if (doctors.length === 0) {
+      contentDiv.innerHTML = `<p class="no-results">No doctors found with the given filters.</p>`;
+    } else {
+      renderDoctorCards(doctors);
+    }
+  } catch (error) {
+    alert("Error filtering doctors. Please try again later.");
+    console.error(error);
+  }
+}
+
+// Handle form submission for adding a doctor
+export async function adminAddDoctor() {
+  const name = document.getElementById("addDocName").value.trim();
+  const email = document.getElementById("addDocEmail").value.trim();
+  const phone = document.getElementById("addDocPhone").value.trim();
+  const password = document.getElementById("addDocPassword").value;
+  const specialty = document.getElementById("addDocSpecialty").value;
+  const times = document.getElementById("addDocTimes").value.split(',').map(t => t.trim());
+
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Admin not authenticated. Please log in again.");
+    return;
+  }
+
+  const doctor = { name, email, phone, password, specialty, availableTimes: times };
+
+  try {
+    const result = await saveDoctor(doctor, token);
+    if (result.success) {
+      alert("Doctor added successfully!");
+      document.getElementById("modal-close-btn").click();
+      loadDoctorCards(); // Refresh doctor list
+    } else {
+      alert("Failed to add doctor: " + result.message);
+    }
+  } catch (error) {
+    alert("Something went wrong while saving doctor.");
+    console.error(error);
+  }
+}
