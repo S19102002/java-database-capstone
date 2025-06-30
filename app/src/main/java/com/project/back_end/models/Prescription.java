@@ -1,4 +1,4 @@
-package com.project.back_end.models;
+/*package com.project.back_end.models;
 
 public class Prescription {
 
@@ -53,4 +53,98 @@ public class Prescription {
 //    - These methods allow access and modification of the fields of the Prescription class.
 
 
+}*/
+package com.project.back_end.models;
+
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "prescriptions") // Maps this class to the "prescriptions" MongoDB collection
+public class Prescription {
+
+    // 1. ID
+    @Id
+    private String id;
+
+    // 2. Patient Name
+    @NotNull
+    @Size(min = 3, max = 100)
+    private String patientName;
+
+    // 3. Appointment ID
+    @NotNull
+    private Long appointmentId;
+
+    // 4. Medication
+    @NotNull
+    @Size(min = 3, max = 100)
+    private String medication;
+
+    // 5. Dosage
+    @NotNull
+    private String dosage;
+
+    // 6. Doctor Notes
+    @Size(max = 200)
+    private String doctorNotes;
+
+    // 7. Constructors
+    public Prescription() {
+    }
+
+    public Prescription(String patientName, Long appointmentId, String medication, String dosage, String doctorNotes) {
+        this.patientName = patientName;
+        this.appointmentId = appointmentId;
+        this.medication = medication;
+        this.dosage = dosage;
+        this.doctorNotes = doctorNotes;
+    }
+
+    // 8. Getters and Setters
+    public String getId() {
+        return id;
+    }
+
+    public String getPatientName() {
+        return patientName;
+    }
+
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
+    }
+
+    public Long getAppointmentId() {
+        return appointmentId;
+    }
+
+    public void setAppointmentId(Long appointmentId) {
+        this.appointmentId = appointmentId;
+    }
+
+    public String getMedication() {
+        return medication;
+    }
+
+    public void setMedication(String medication) {
+        this.medication = medication;
+    }
+
+    public String getDosage() {
+        return dosage;
+    }
+
+    public void setDosage(String dosage) {
+        this.dosage = dosage;
+    }
+
+    public String getDoctorNotes() {
+        return doctorNotes;
+    }
+
+    public void setDoctorNotes(String doctorNotes) {
+        this.doctorNotes = doctorNotes;
+    }
 }
+
