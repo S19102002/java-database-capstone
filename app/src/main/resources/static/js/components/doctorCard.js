@@ -39,3 +39,108 @@ Import the overlay function for booking appointments from loggedPatient.js
   Append doctor info and action buttons to the car
   Return the complete doctor card element
 */
+// Import required functions
+import { showBookingOverlay } from './loggedPatient.js';
+import { deleteDoctor } from './doctorServices.js';
+import { getPatientDetails } from './patientServices.js';
+
+/**
+ * Creates and returns a DOM element representing a doctor card
+ * @param {Object} doctor - The doctor object with properties: id, name, specialty, email, availableTimes
+ * @returns {HTMLElement} - The complete doctor card
+ */
+export function createDoctorCard(doctor) {
+  const role = localStorage.getItem("role");
+  const token = localStorage.getItem("token");
+
+  // Create main card container
+  const card = document.createElement("div");
+  card.classList.add("doctor-card");
+
+  // Create info container
+  const infoDiv = document.createElement("div");
+  infoDiv.classList.add("doctor-info");
+
+  const name = document.createElement("h3");
+  name.textContent = `Dr. ${doctor.name}`;
+  infoDiv.appendChild(name);
+
+  const specialty = document.createElement("p");
+  specialty.textContent = `Specialization: ${doctor.specialty}`;
+  infoDiv.appendChild(specialty);
+
+  const email = document.createElement("p");
+  email.textContent = `Email: ${doctor.email}`;
+  infoDiv.appendChild(email);
+
+  const times = document.createElement("ul");
+  times.textContent = "Available Times:";
+  doctor.availableTimes.forEach(time => {
+    const li = document.createElement("li");
+    li.textContent = time;
+    times.appendChild(li);
+  });
+  infoDiv.appendChild(times);
+
+  // Create action container
+  const actionsDiv = document.createElement("div");
+  actionsDiv.classList.add("doctor-actions");
+
+  // === ADMIN ROLE ===
+  if (role === "admin") {
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "Delete Doctor";
+    deleteBtn.classList.add("adminBtn");
+
+    deleteBtn.addEventListener("click", async () => {
+      const confirmed = confirm(`Are you sure you want to delete Dr. ${doctor.name}?`);
+      if (!confirmed) return;
+
+      const response = await deleteDoctor(doctor.id, token);
+      if (response.ok) {
+        alert("Doctor deleted successfully.");
+        card.remove();
+      } else {
+        alert("Failed to delete doctor.");
+      }
+    });
+
+    actionsDiv.appendChild(deleteBtn);
+  }
+
+  // === NOT LOGGED-IN PATIENT ===
+  else if (!token || role !== "patient") {
+    const bookBtn = document.createElement("button");
+    bookBtn.textContent = "Book Now";
+    bookBtn.classList.add("dashboard-btn");
+
+    bookBtn.addEventListener("click", () => {
+      alert("Please log in as a patient to book an appointment.");
+    });
+
+    actionsDiv.appendChild(bookBtn);
+  }
+
+  // === LOGGED-IN PATIENT ===
+  else if (role === "patient") {
+    const bookBtn = document.createElement("button");
+    bookBtn.textContent = "Book Now";
+    bookBtn.classList.add("dashboard-btn");
+
+    bookBtn.addEventListener("click", async () => {
+      try {
+        const patientData = await getPatientDetails(token);
+        showBookingOverlay(doctor, patientData);
+      } catch (error) {
+        alert("Error fetching patient details. Please try again.");
+      }
+    });
+
+    actionsDiv.appendChild(bookBtn);
+  }
+
+  // Final Assembly
+  card.appendChild(infoDiv);
+  card.appendChild(actionsDiv);
+  return card;
+}
