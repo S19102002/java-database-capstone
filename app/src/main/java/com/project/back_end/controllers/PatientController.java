@@ -1,4 +1,4 @@
-package com.project.back_end.controllers;
+/*package com.project.back_end.controllers;
 
 public class PatientController {
 
@@ -47,6 +47,83 @@ public class PatientController {
 
 
 
+}*/
+package com.project.back_end.controllers;
+
+import com.project.back_end.DTO.Login;
+import com.project.back_end.model.Patient;
+import com.project.back_end.services.PatientService;
+import com.project.back_end.services.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+@RestController // 1. Set up as REST Controller
+@RequestMapping("/patient") // 1. Base route
+public class PatientController {
+
+    private final PatientService patientService;
+    private final Service service;
+
+    @Autowired
+    public PatientController(PatientService patientService, Service service) {
+        this.patientService = patientService;
+        this.service = service;
+    }
+
+    // 3. Get Patient Details
+    @GetMapping("/get/{token}")
+    public ResponseEntity<?> getPatient(@PathVariable String token) {
+        if (!service.validateToken(token, "patient")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token for patient.");
+        }
+        return patientService.getPatientDetails(token);
+    }
+
+    // 4. Register Patient
+    @PostMapping("/create")
+    public ResponseEntity<?> createPatient(@RequestBody Patient patient) {
+        if (!service.validatePatient(patient)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Patient already exists.");
+        }
+
+        int result = patientService.createPatient(patient);
+        if (result == 1) {
+            return ResponseEntity.status(HttpStatus.CREATED).body("Patient created successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create patient.");
+        }
+    }
+
+    // 5. Patient Login
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody Login login) {
+        return service.validatePatientLogin(login);
+    }
+
+    // 6. Get Patient Appointments
+    @GetMapping("/appointments/{id}/{token}/{user}")
+    public ResponseEntity<?> getPatientAppointment(@PathVariable Long id,
+                                                   @PathVariable String token,
+                                                   @PathVariable String user) {
+        if (!service.validateToken(token, user)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token for " + user);
+        }
+        return patientService.getPatientAppointment(id);
+    }
+
+    // 7. Filter Patient Appointments
+    @GetMapping("/filter/{condition}/{name}/{token}")
+    public ResponseEntity<?> filterPatientAppointment(@PathVariable String condition,
+                                                      @PathVariable String name,
+                                                      @PathVariable String token) {
+        if (!service.validateToken(token, "patient")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token for patient.");
+        }
+        return service.filterPatient(condition, name, token);
+    }
 }
+
 
 
