@@ -1,4 +1,4 @@
-package com.project.back_end.services;
+/*package com.project.back_end.services;
 
 public class PatientService {
 // 1. **Add @Service Annotation**:
@@ -55,4 +55,140 @@ public class PatientService {
 
 
 
+}*/
+package com.project.back_end.services;
+
+import com.project.back_end.DTO.AppointmentDTO;
+import com.project.back_end.model.Appointment;
+import com.project.back_end.model.Patient;
+import com.project.back_end.repo.AppointmentRepository;
+import com.project.back_end.repo.PatientRepository;
+import com.project.back_end.utils.TokenService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service // 1. Mark as service layer component
+public class PatientService {
+
+    private final PatientRepository patientRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final TokenService tokenService;
+
+    // 2. Constructor injection
+    @Autowired
+    public PatientService(PatientRepository patientRepository,
+                          AppointmentRepository appointmentRepository,
+                          TokenService tokenService) {
+        this.patientRepository = patientRepository;
+        this.appointmentRepository = appointmentRepository;
+        this.tokenService = tokenService;
+    }
+
+    // 3. Create patient
+    public int createPatient(Patient patient) {
+        try {
+            patientRepository.save(patient);
+            return 1;
+        } catch (Exception e) {
+            System.err.println("Error while saving patient: " + e.getMessage());
+            return 0;
+        }
+    }
+
+    // 4. Get all appointments for a patient
+    @Transactional
+    public List<AppointmentDTO> getPatientAppointment(Long patientId) {
+        try {
+            List<Appointment> appointments = appointmentRepository.findByPatientId(patientId);
+            return appointments.stream()
+                    .map(AppointmentDTO::new)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("Error fetching appointments: " + e.getMessage());
+            return List.of();
+        }
+    }
+
+    // 5. Filter appointments by status: "past" or "future"
+    @Transactional
+    public ResponseEntity<?> filterByCondition(Long patientId, String condition) {
+        try {
+            int status = switch (condition.toLowerCase()) {
+                case "past" -> 1;
+                case "future" -> 0;
+                default -> throw new IllegalArgumentException("Invalid condition: " + condition);
+            };
+
+            List<Appointment> appointments = appointmentRepository.findByPatient_IdAndStatusOrderByAppointmentTimeAsc(patientId, status);
+            List<AppointmentDTO> dtos = appointments.stream()
+                    .map(AppointmentDTO::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(dtos);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to filter appointments");
+        }
+    }
+
+    // 6. Filter appointments by doctor name
+    @Transactional
+    public ResponseEntity<?> filterByDoctor(Long patientId, String doctorName) {
+        try {
+            List<Appointment> appointments = appointmentRepository.filterByDoctorNameAndPatientId(doctorName, patientId);
+            List<AppointmentDTO> dtos = appointments.stream()
+                    .map(AppointmentDTO::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(dtos);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error filtering by doctor name");
+        }
+    }
+
+    // 7. Filter appointments by doctor and condition (past/future)
+    @Transactional
+    public ResponseEntity<?> filterByDoctorAndCondition(Long patientId, String doctorName, String condition) {
+        try {
+            int status = switch (condition.toLowerCase()) {
+                case "past" -> 1;
+                case "future" -> 0;
+                default -> throw new IllegalArgumentException("Invalid condition: " + condition);
+            };
+
+            List<Appointment> appointments =
+                    appointmentRepository.filterByDoctorNameAndPatientIdAndStatus(doctorName, patientId, status);
+            List<AppointmentDTO> dtos = appointments.stream()
+                    .map(AppointmentDTO::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(dtos);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to filter by doctor and condition");
+        }
+    }
+
+    // 8. Get patient details by token
+    public ResponseEntity<?> getPatientDetails(String token) {
+        try {
+            String email = tokenService.extractEmail(token);
+            Patient patient = patientRepository.findByEmail(email);
+            if (patient != null) {
+                return ResponseEntity.ok(patient);
+            } else {
+                return ResponseEntity.status(404).body("Patient not found");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error fetching patient details");
+        }
+    }
 }
+
