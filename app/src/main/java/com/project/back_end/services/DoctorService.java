@@ -1,4 +1,4 @@
-package com.project.back_end.services;
+/*package com.project.back_end.services;
 
 public class DoctorService {
 
@@ -89,4 +89,172 @@ public class DoctorService {
 //    - Instruction: Ensure proper filtering logic to handle AM/PM time periods.
 
    
+}*/
+package com.project.back_end.services;
+
+import com.project.back_end.model.Doctor;
+import com.project.back_end.model.Appointment;
+import com.project.back_end.repo.DoctorRepository;
+import com.project.back_end.repo.AppointmentRepository;
+import com.project.back_end.services.token.TokenService;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalTime;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service  // 1. Mark as a Spring service
+public class DoctorService {
+
+    private final DoctorRepository doctorRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final TokenService tokenService;
+
+    // 2. Constructor Injection
+    @Autowired
+    public DoctorService(DoctorRepository doctorRepository, AppointmentRepository appointmentRepository, TokenService tokenService) {
+        this.doctorRepository = doctorRepository;
+        this.appointmentRepository = appointmentRepository;
+        this.tokenService = tokenService;
+    }
+
+    // 4. getDoctorAvailability Method
+    @Transactional
+    public List<LocalTime> getDoctorAvailability(Long doctorId, LocalDate date) {
+        Optional<Doctor> doctorOptional = doctorRepository.findById(doctorId);
+        if (doctorOptional.isEmpty()) return Collections.emptyList();
+
+        Doctor doctor = doctorOptional.get();
+        List<LocalTime> availableTimes = doctor.getAvailableTimes();
+
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = start.plusDays(1);
+
+        List<Appointment> booked = appointmentRepository.findByDoctorIdAndAppointmentTimeBetween(doctorId, start, end);
+        Set<LocalTime> bookedTimes = booked.stream().map(app -> app.getAppointmentTime().toLocalTime()).collect(Collectors.toSet());
+
+        return availableTimes.stream().filter(t -> !bookedTimes.contains(t)).collect(Collectors.toList());
+    }
+
+    // 5. saveDoctor Method
+    @Transactional
+    public int saveDoctor(Doctor doctor) {
+        if (doctorRepository.findByEmail(doctor.getEmail()) != null) return -1;
+        try {
+            doctorRepository.save(doctor);
+            return 1;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    // 6. updateDoctor Method
+    @Transactional
+    public int updateDoctor(Doctor doctor) {
+        if (!doctorRepository.existsById(doctor.getId())) return -1;
+        try {
+            doctorRepository.save(doctor);
+            return 1;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    // 7. getDoctors Method
+    @Transactional
+    public List<Doctor> getDoctors() {
+        return doctorRepository.findAll();
+    }
+
+    // 8. deleteDoctor Method
+    @Transactional
+    public int deleteDoctor(Long id) {
+        if (!doctorRepository.existsById(id)) return -1;
+        try {
+            appointmentRepository.deleteAllByDoctorId(id);
+            doctorRepository.deleteById(id);
+            return 1;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    // 9. validateDoctor Method
+    public Map<String, Object> validateDoctor(String email, String password) {
+        Doctor doctor = doctorRepository.findByEmail(email);
+        Map<String, Object> response = new HashMap<>();
+        if (doctor == null || !doctor.getPassword().equals(password)) {
+            response.put("success", false);
+            response.put("message", "Invalid credentials");
+        } else {
+            String token = tokenService.generateToken(email, "doctor");
+            response.put("success", true);
+            response.put("token", token);
+        }
+        return response;
+    }
+
+    // 10. findDoctorByName Method
+    @Transactional
+    public List<Doctor> findDoctorByName(String name) {
+        return doctorRepository.findByNameLike("%" + name + "%");
+    }
+
+    // 11. filterDoctorsByNameSpecilityandTime Method
+    @Transactional
+    public List<Doctor> filterDoctorsByNameSpecilityandTime(String name, String specialty, String time) {
+        List<Doctor> doctors = doctorRepository.findByNameContainingIgnoreCaseAndSpecialtyIgnoreCase(name, specialty);
+        return filterDoctorByTime(doctors, time);
+    }
+
+    // 12. filterDoctorByTime Method
+    private List<Doctor> filterDoctorByTime(List<Doctor> doctors, String timePeriod) {
+        return doctors.stream().filter(d -> d.getAvailableTimes().stream()
+                .anyMatch(t -> isMatchingPeriod(t, timePeriod))).collect(Collectors.toList());
+    }
+
+    // 13. filterDoctorByNameAndTime Method
+    @Transactional
+    public List<Doctor> filterDoctorByNameAndTime(String name, String time) {
+        List<Doctor> doctors = doctorRepository.findByNameLike("%" + name + "%");
+        return filterDoctorByTime(doctors, time);
+    }
+
+    // 14. filterDoctorByNameAndSpecility Method
+    @Transactional
+    public List<Doctor> filterDoctorByNameAndSpecility(String name, String specialty) {
+        return doctorRepository.findByNameContainingIgnoreCaseAndSpecialtyIgnoreCase(name, specialty);
+    }
+
+    // 15. filterDoctorByTimeAndSpecility Method
+    @Transactional
+    public List<Doctor> filterDoctorByTimeAndSpecility(String specialty, String time) {
+        List<Doctor> doctors = doctorRepository.findBySpecialtyIgnoreCase(specialty);
+        return filterDoctorByTime(doctors, time);
+    }
+
+    // 16. filterDoctorBySpecility Method
+    @Transactional
+    public List<Doctor> filterDoctorBySpecility(String specialty) {
+        return doctorRepository.findBySpecialtyIgnoreCase(specialty);
+    }
+
+    // 17. filterDoctorsByTime Method
+    @Transactional
+    public List<Doctor> filterDoctorsByTime(String time) {
+        List<Doctor> doctors = doctorRepository.findAll();
+        return filterDoctorByTime(doctors, time);
+    }
+
+    private boolean isMatchingPeriod(LocalTime time, String period) {
+        int hour = time.getHour();
+        if ("AM".equalsIgnoreCase(period)) return hour < 12;
+        if ("PM".equalsIgnoreCase(period)) return hour >= 12;
+        return true;
+    }
 }
+
