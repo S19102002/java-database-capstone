@@ -52,3 +52,81 @@
     - Call renderContent() (assumes it sets up the UI layout)
     - Call loadAppointments() to display today's appointments by default
 */
+import { getAllAppointments } from "../services/appointmentServices.js";
+import { createPatientRow } from "../components/patientAppointmentRow.js";
+
+// DOM elements
+const tbody = document.getElementById("appointments-table-body");
+const searchInput = document.getElementById("search-patient");
+const datePicker = document.getElementById("appointment-date-picker");
+const todayBtn = document.getElementById("today-btn");
+
+// Initialization
+let selectedDate = new Date().toISOString().split("T")[0]; // 'YYYY-MM-DD'
+let patientName = null;
+const token = localStorage.getItem("token");
+
+// Event: Search bar input
+if (searchInput) {
+  searchInput.addEventListener("input", () => {
+    const value = searchInput.value.trim();
+    patientName = value !== "" ? value : null;
+    loadAppointments();
+  });
+}
+
+// Event: "Today" button click
+if (todayBtn) {
+  todayBtn.addEventListener("click", () => {
+    selectedDate = new Date().toISOString().split("T")[0];
+    if (datePicker) {
+      datePicker.value = selectedDate;
+    }
+    loadAppointments();
+  });
+}
+
+// Event: Date picker change
+if (datePicker) {
+  datePicker.addEventListener("change", () => {
+    selectedDate = datePicker.value;
+    loadAppointments();
+  });
+
+  // Set default to today on load
+  datePicker.value = selectedDate;
+}
+
+// Function: Load and display appointments
+async function loadAppointments() {
+  try {
+    const appointments = await getAllAppointments(selectedDate, patientName, token);
+    tbody.innerHTML = ""; // Clear previous rows
+
+    if (!appointments || appointments.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No Appointments found for today.</td></tr>`;
+      return;
+    }
+
+    appointments.forEach(appointment => {
+      const patient = {
+        id: appointment.patientId,
+        name: appointment.patientName,
+        phone: appointment.patientPhone,
+        email: appointment.patientEmail
+      };
+      const row = createPatientRow(appointment, patient);
+      tbody.appendChild(row);
+    });
+
+  } catch (error) {
+    console.error("Error loading appointments:", error);
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Error loading appointments. Try again later.</td></tr>`;
+  }
+}
+
+// Page load setup
+document.addEventListener("DOMContentLoaded", () => {
+  renderContent();   // Assumes it sets up header, footer, layout, etc.
+  loadAppointments();
+});
