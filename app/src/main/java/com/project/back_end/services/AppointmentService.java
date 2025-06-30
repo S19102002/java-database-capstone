@@ -1,4 +1,4 @@
-package com.project.back_end.services;
+/*package com.project.back_end.services;
 
 public class AppointmentService {
 // 1. **Add @Service Annotation**:
@@ -42,4 +42,107 @@ public class AppointmentService {
 //    - Instruction: Add `@Transactional` before this method to ensure atomicity when updating appointment status.
 
 
+}*/
+package com.project.back_end.services;
+
+import com.project.back_end.model.Appointment;
+import com.project.back_end.model.Doctor;
+import com.project.back_end.model.Patient;
+import com.project.back_end.repo.AppointmentRepository;
+import com.project.back_end.repo.DoctorRepository;
+import com.project.back_end.repo.PatientRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+@Service  // 1. Mark as Spring Service
+public class AppointmentService {
+
+    private final AppointmentRepository appointmentRepository;
+    private final PatientRepository patientRepository;
+    private final DoctorRepository doctorRepository;
+
+    // 2. Constructor Injection
+    @Autowired
+    public AppointmentService(AppointmentRepository appointmentRepository,
+                              PatientRepository patientRepository,
+                              DoctorRepository doctorRepository) {
+        this.appointmentRepository = appointmentRepository;
+        this.patientRepository = patientRepository;
+        this.doctorRepository = doctorRepository;
+    }
+
+    // 4. Book Appointment
+    @Transactional
+    public int bookAppointment(Appointment appointment) {
+        try {
+            appointmentRepository.save(appointment);
+            return 1;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    // 5. Update Appointment
+    @Transactional
+    public String updateAppointment(Long id, Appointment updatedData) {
+        Optional<Appointment> optionalAppointment = appointmentRepository.findById(id);
+        if (optionalAppointment.isEmpty()) return "Appointment not found.";
+
+        Appointment existing = optionalAppointment.get();
+
+        if (!existing.getPatient().getId().equals(updatedData.getPatient().getId())) {
+            return "Unauthorized update attempt.";
+        }
+
+        LocalDateTime newTime = updatedData.getAppointmentTime();
+        Long doctorId = updatedData.getDoctor().getId();
+
+        List<Appointment> conflicts = appointmentRepository.findByDoctorIdAndAppointmentTimeBetween(
+                doctorId, newTime.minusMinutes(59), newTime.plusMinutes(59));
+
+        if (!conflicts.isEmpty()) return "Doctor is not available at the given time.";
+
+        existing.setAppointmentTime(newTime);
+        existing.setStatus(updatedData.getStatus());
+
+        appointmentRepository.save(existing);
+        return "Appointment updated successfully.";
+    }
+
+    // 6. Cancel Appointment
+    @Transactional
+    public String cancelAppointment(Long appointmentId, Long patientId) {
+        Optional<Appointment> optionalAppointment = appointmentRepository.findById(appointmentId);
+        if (optionalAppointment.isEmpty()) return "Appointment not found.";
+
+        Appointment appointment = optionalAppointment.get();
+        if (!appointment.getPatient().getId().equals(patientId)) {
+            return "Unauthorized cancellation attempt.";
+        }
+
+        appointmentRepository.delete(appointment);
+        return "Appointment cancelled successfully.";
+    }
+
+    // 7. Get Appointments for a Doctor (with optional filter)
+    @Transactional
+    public List<Appointment> getDoctorAppointments(Long doctorId, LocalDateTime dayStart, LocalDateTime dayEnd, String patientName) {
+        if (patientName == null || patientName.equals("null")) {
+            return appointmentRepository.findByDoctorIdAndAppointmentTimeBetween(doctorId, dayStart, dayEnd);
+        }
+        return appointmentRepository.findByDoctorIdAndPatient_NameContainingIgnoreCaseAndAppointmentTimeBetween(
+                doctorId, patientName, dayStart, dayEnd);
+    }
+
+    // 8. Change Status
+    @Transactional
+    public void changeAppointmentStatus(Long appointmentId, int status) {
+        appointmentRepository.updateStatus(status, appointmentId);
+    }
 }
+
