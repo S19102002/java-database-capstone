@@ -28,15 +28,39 @@ public class Login {
 
 
 }*/
-package com.project.back_end.repo;
+package com.project.back_end.DTO;
 
-import com.project.back_end.model.Admin;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+public class Login {
 
-@Repository
-public interface AdminRepository extends JpaRepository<Admin, Long> {
+    // 1. Represents the email address used for logging into the system
+    private String email;
 
-    // Custom method to find Admin by username
-    Admin findByUsername(String username);
+    // 2. Represents the password associated with the email address
+    private String password;
+
+    // 3. Default constructor (implicitly provided, but can be declared for clarity)
+    public Login() {
+    }
+
+    // 4. Getters and Setters
+
+    // Gets the email value
+    public String getEmail() {
+        return email;
+    }
+
+    // Sets the email value
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    // Gets the password value
+    public String getPassword() {
+        return password;
+    }
+
+    // Sets the password value
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
