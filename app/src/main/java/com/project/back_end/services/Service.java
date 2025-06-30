@@ -1,4 +1,4 @@
-package com.project.back_end.services;
+/*package com.project.back_end.services;
 
 public class Service {
 // 1. **@Service Annotation**
@@ -63,4 +63,143 @@ public class Service {
 // This flexible method supports patient-specific querying and enhances user experience on the client side.
 
 
+}*/
+package com.project.back_end.services;
+
+import com.project.back_end.DTO.Login;
+import com.project.back_end.model.Appointment;
+import com.project.back_end.model.Doctor;
+import com.project.back_end.model.Patient;
+import com.project.back_end.repo.AdminRepository;
+import com.project.back_end.repo.DoctorRepository;
+import com.project.back_end.repo.PatientRepository;
+import com.project.back_end.security.TokenService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+@Service // 1. Marked as a Spring-managed service
+public class Service {
+
+    private final TokenService tokenService;
+    private final AdminRepository adminRepository;
+    private final DoctorRepository doctorRepository;
+    private final PatientRepository patientRepository;
+    private final DoctorService doctorService;
+    private final PatientService patientService;
+
+    // 2. Constructor Injection
+    @Autowired
+    public Service(TokenService tokenService,
+                   AdminRepository adminRepository,
+                   DoctorRepository doctorRepository,
+                   PatientRepository patientRepository,
+                   DoctorService doctorService,
+                   PatientService patientService) {
+        this.tokenService = tokenService;
+        this.adminRepository = adminRepository;
+        this.doctorRepository = doctorRepository;
+        this.patientRepository = patientRepository;
+        this.doctorService = doctorService;
+        this.patientService = patientService;
+    }
+
+    // 3. Validate Token
+    public boolean validateToken(String token, String email) {
+        return tokenService.validateToken(token, email);
+    }
+
+    // 4. Validate Admin Login
+    public ResponseEntity<?> validateAdmin(Login login) {
+        try {
+            var admin = adminRepository.findByUsername(login.getEmail());
+            if (admin != null && admin.getPassword().equals(login.getPassword())) {
+                String token = tokenService.generateToken(admin.getUsername());
+                return ResponseEntity.ok(token);
+            }
+            return ResponseEntity.status(401).body("Invalid credentials.");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error while authenticating admin.");
+        }
+    }
+
+    // 5. Filter Doctor
+    public List<Doctor> filterDoctor(String name, String specialty, String time) {
+        if (name != null && specialty != null && time != null) {
+            return doctorService.filterDoctorsByNameSpecilityandTime(name, specialty, time);
+        } else if (name != null && specialty != null) {
+            return doctorService.filterDoctorByNameAndSpecility(name, specialty);
+        } else if (name != null && time != null) {
+            return doctorService.filterDoctorByNameAndTime(name, time);
+        } else if (specialty != null && time != null) {
+            return doctorService.filterDoctorByTimeAndSpecility(time, specialty);
+        } else if (name != null) {
+            return doctorService.findDoctorByName(name);
+        } else if (specialty != null) {
+            return doctorService.filterDoctorBySpecility(specialty);
+        } else if (time != null) {
+            return doctorService.filterDoctorsByTime(time);
+        } else {
+            return doctorService.getDoctors();
+        }
+    }
+
+    // 6. Validate Appointment Time
+    public int validateAppointment(Long doctorId, LocalDateTime appointmentTime) {
+        Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+        if (doctorOpt.isEmpty()) return -1;
+
+        List<String> availableSlots = doctorService.getDoctorAvailability(doctorId, appointmentTime.toLocalDate());
+        String formattedTime = appointmentTime.toLocalTime().toString();
+
+        return availableSlots.contains(formattedTime) ? 1 : 0;
+    }
+
+    // 7. Validate New Patient Registration
+    public boolean validatePatient(Patient patient) {
+        Patient existing = patientRepository.findByEmailOrPhone(patient.getEmail(), patient.getPhone());
+        return existing == null;
+    }
+
+    // 8. Validate Patient Login
+    public ResponseEntity<?> validatePatientLogin(Login login) {
+        try {
+            Patient patient = patientRepository.findByEmail(login.getEmail());
+            if (patient == null || !patient.getPassword().equals(login.getPassword())) {
+                return ResponseEntity.status(401).body("Invalid email or password.");
+            }
+            String token = tokenService.generateToken(patient.getEmail());
+            return ResponseEntity.ok(token);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error during patient login.");
+        }
+    }
+
+    // 9. Filter Patient Appointments
+    public ResponseEntity<?> filterPatient(String token, String doctorName, String condition) {
+        try {
+            String email = tokenService.extractEmail(token);
+            Patient patient = patientRepository.findByEmail(email);
+            if (patient == null) return ResponseEntity.status(401).body("Unauthorized access.");
+
+            if (doctorName != null && condition != null) {
+                return patientService.filterByDoctorAndCondition(patient.getId(), doctorName, condition);
+            } else if (doctorName != null) {
+                return patientService.filterByDoctor(patient.getId(), doctorName);
+            } else if (condition != null) {
+                return patientService.filterByCondition(patient.getId(), condition);
+            } else {
+                return patientService.getPatientAppointment(patient.getId());
+            }
+
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to filter patient data.");
+        }
+    }
 }
+
