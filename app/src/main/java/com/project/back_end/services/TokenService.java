@@ -1,4 +1,4 @@
-package com.project.back_end.services;
+/*package com.project.back_end.services;
 
 public class TokenService {
 // 1. **@Component Annotation**
@@ -40,4 +40,91 @@ public class TokenService {
 // This ensures secure access control based on the user's role and their existence in the system.
 
 
+}*/
+package com.project.back_end.services;
+
+import com.project.back_end.model.Admin;
+import com.project.back_end.model.Doctor;
+import com.project.back_end.model.Patient;
+import com.project.back_end.repo.AdminRepository;
+import com.project.back_end.repo.DoctorRepository;
+import com.project.back_end.repo.PatientRepository;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.util.Date;
+
+@Component // 1. Marked as Spring-managed component
+public class TokenService {
+
+    private final AdminRepository adminRepository;
+    private final DoctorRepository doctorRepository;
+    private final PatientRepository patientRepository;
+
+    private SecretKey signingKey;
+
+    @Value("${jwt.secret}")
+    private String secret;
+
+    public TokenService(AdminRepository adminRepository,
+                        DoctorRepository doctorRepository,
+                        PatientRepository patientRepository) {
+        this.adminRepository = adminRepository;
+        this.doctorRepository = doctorRepository;
+        this.patientRepository = patientRepository;
+    }
+
+    @PostConstruct // Initialize signingKey after secret is injected
+    public void init() {
+        this.signingKey = Keys.hmacShaKeyFor(secret.getBytes());
+    }
+
+    // 4. Generate JWT Token for given email
+    public String generateToken(String email) {
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000)) // 7 days
+                .signWith(signingKey, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    // 5. Extract email from JWT
+    public String extractEmail(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(signingKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
+    // 6. Validate JWT for specific role
+    public boolean validateToken(String token, String role) {
+        try {
+            String email = extractEmail(token);
+
+            switch (role.toLowerCase()) {
+                case "admin":
+                    Admin admin = adminRepository.findByUsername(email);
+                    return admin != null;
+                case "doctor":
+                    Doctor doctor = doctorRepository.findByEmail(email);
+                    return doctor != null;
+                case "patient":
+                    Patient patient = patientRepository.findByEmail(email);
+                    return patient != null;
+                default:
+                    return false;
+            }
+
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
+
