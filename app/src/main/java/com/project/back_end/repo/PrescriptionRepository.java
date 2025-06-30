@@ -1,4 +1,4 @@
-package com.project.back_end.repo;
+/*package com.project.back_end.repo;
 
 public interface PrescriptionRepository  {
 // 1. Extend MongoRepository:
@@ -17,5 +17,20 @@ public interface PrescriptionRepository  {
 //      - MongoRepository automatically derives the query from the method name, in this case, it will find prescriptions by the appointment ID.
 
 
+}*/
+package com.project.back_end.repo;
+
+import com.project.back_end.model.Prescription;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface PrescriptionRepository extends MongoRepository<Prescription, String> {
+
+    // 1. Custom Query Method to find all prescriptions by appointment ID
+    List<Prescription> findByAppointmentId(Long appointmentId);
 }
+
 
