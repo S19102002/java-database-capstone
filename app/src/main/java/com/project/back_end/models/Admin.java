@@ -1,4 +1,4 @@
-package com.project.back_end.models;
+/*package com.project.back_end.models;
 
 public class Admin {
 
@@ -34,4 +34,66 @@ public class Admin {
 // 5. Getters and Setters:
 //    - Standard getter and setter methods are provided for accessing and modifying the fields.
 
+}*/
+package com.project.back_end.models;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+
+@Entity // Marks this class as a JPA entity
+public class Admin {
+
+    // 1. Primary Key - ID
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // 2. Username
+    @NotNull
+    private String username;
+
+    // 3. Password (write-only in JSON)
+    @NotNull
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String password;
+
+    // 4. No-arg Constructor (required by JPA)
+    public Admin() {
+    }
+
+    // 4. Optional All-arg Constructor
+    public Admin(Long id, String username, String password) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+    }
+
+    // 5. Getters and Setters
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
+
