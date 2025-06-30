@@ -102,3 +102,64 @@ and triggers modal-based login functionality.
     * Properly close all opened tags to complete the document structure.
 
  -->
+ <!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Metadata -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select Role</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="../assets/images/logo/Logo.png" type="image/png">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="../assets/css/index.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+
+  <!-- JavaScript Files (deferred) -->
+  <script src="../js/util.js" defer></script>
+  <script src="../js/render.js" defer></script>
+  <script src="../js/components/header.js" defer></script>
+  <script src="../js/components/footer.js" defer></script>
+</head>
+<body>
+  <!-- Page Container -->
+  <div class="container">
+
+    <!-- Wrapper -->
+    <div class="wrapper">
+
+      <!-- Header (Rendered by JS) -->
+      <div id="header"></div>
+
+      <!-- Main Content -->
+      <main>
+        <h1>Select Your Role</h1>
+        <div class="role-buttons">
+          <button id="adminLogin">Admin</button>
+          <button id="patientLogin">Patient</button>
+          <button id="doctorLogin">Doctor</button>
+        </div>
+      </main>
+
+      <!-- Footer (Rendered by JS) -->
+      <div id="footer"></div>
+
+    </div> <!-- End of wrapper -->
+
+    <!-- Modal Structure -->
+    <div id="modal" class="modal hidden">
+      <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <div id="modal-body"></div>
+      </div>
+    </div>
+
+  </div> <!-- End of container -->
+
+  <!-- Page-Specific Logic -->
+  <script type="module" src="../js/index.js"></script>
+</body>
+</html>
