@@ -1,4 +1,4 @@
-package com.project.back_end.services;
+/*package com.project.back_end.services;
 
 public class PrescriptionService {
     
@@ -31,4 +31,64 @@ public class PrescriptionService {
 //    - Instruction: Ensure that all potential exceptions are handled properly, and meaningful responses are returned to the client.
 
 
+}*/
+package com.project.back_end.services;
+
+import com.project.back_end.model.Prescription;
+import com.project.back_end.repo.PrescriptionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service // 1. Marking the class as a Spring-managed service component
+public class PrescriptionService {
+
+    private final PrescriptionRepository prescriptionRepository;
+
+    // 2. Constructor Injection for PrescriptionRepository
+    @Autowired
+    public PrescriptionService(PrescriptionRepository prescriptionRepository) {
+        this.prescriptionRepository = prescriptionRepository;
+    }
+
+    // 3. Save a prescription only if one does not already exist for the same appointment
+    public ResponseEntity<?> savePrescription(Prescription prescription) {
+        try {
+            List<Prescription> existingPrescriptions = prescriptionRepository.findByAppointmentId(prescription.getAppointmentId());
+            if (!existingPrescriptions.isEmpty()) {
+                return ResponseEntity.badRequest().body("Prescription already exists for this appointment.");
+            }
+
+            prescriptionRepository.save(prescription);
+            return ResponseEntity.status(201).body("Prescription saved successfully.");
+
+        } catch (Exception e) {
+            System.err.println("Error while saving prescription: " + e.getMessage());
+            return ResponseEntity.internalServerError().body("Failed to save prescription.");
+        }
+    }
+
+    // 4. Retrieve a prescription by appointment ID
+    public ResponseEntity<?> getPrescription(Long appointmentId) {
+        try {
+            List<Prescription> prescriptions = prescriptionRepository.findByAppointmentId(appointmentId);
+
+            if (prescriptions.isEmpty()) {
+                return ResponseEntity.status(404).body("No prescription found for the given appointment.");
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("prescription", prescriptions.get(0)); // Assuming only one prescription per appointment
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.err.println("Error while retrieving prescription: " + e.getMessage());
+            return ResponseEntity.internalServerError().body("Failed to retrieve prescription.");
+        }
+    }
 }
+
