@@ -1,4 +1,4 @@
-package com.project.back_end.controllers;
+/*package com.project.back_end.controllers;
 
 
 public class DoctorController {
@@ -58,4 +58,113 @@ public class DoctorController {
 //    - Calls the shared `Service` to perform filtering logic and returns matching doctors in the response.
 
 
+}*/
+package com.project.back_end.controllers;
+
+import com.project.back_end.DTO.Login;
+import com.project.back_end.model.Doctor;
+import com.project.back_end.services.DoctorService;
+import com.project.back_end.services.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController // 1. REST Controller
+@RequestMapping("${api.path}doctor") // 1. Base path: configurable + /doctor
+public class DoctorController {
+
+    private final DoctorService doctorService;
+    private final Service service;
+
+    @Autowired
+    public DoctorController(DoctorService doctorService, Service service) {
+        this.doctorService = doctorService;
+        this.service = service;
+    }
+
+    // 3. Doctor Availability
+    @GetMapping("/availability/{user}/{id}/{date}/{token}")
+    public ResponseEntity<?> getDoctorAvailability(@PathVariable String user,
+                                                   @PathVariable Long id,
+                                                   @PathVariable String date,
+                                                   @PathVariable String token) {
+        if (!service.validateToken(token, user)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token for " + user);
+        }
+        return doctorService.getDoctorAvailability(id, date);
+    }
+
+    // 4. Get All Doctors
+    @GetMapping("/get")
+    public ResponseEntity<?> getDoctor() {
+        return ResponseEntity.ok(Map.of("doctors", doctorService.getDoctors()));
+    }
+
+    // 5. Save/Register Doctor (Admin Only)
+    @PostMapping("/save/{token}")
+    public ResponseEntity<?> saveDoctor(@RequestBody Doctor doctor,
+                                        @PathVariable String token) {
+        if (!service.validateToken(token, "admin")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token for admin.");
+        }
+
+        int result = doctorService.saveDoctor(doctor);
+        if (result == -1) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Doctor already exists.");
+        } else if (result == 1) {
+            return ResponseEntity.status(HttpStatus.CREATED).body("Doctor added successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to save doctor.");
+        }
+    }
+
+    // 6. Doctor Login
+    @PostMapping("/login")
+    public ResponseEntity<?> doctorLogin(@RequestBody Login login) {
+        return doctorService.validateDoctor(login);
+    }
+
+    // 7. Update Doctor (Admin Only)
+    @PutMapping("/update/{token}")
+    public ResponseEntity<?> updateDoctor(@RequestBody Doctor doctor,
+                                          @PathVariable String token) {
+        if (!service.validateToken(token, "admin")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token for admin.");
+        }
+
+        int result = doctorService.updateDoctor(doctor);
+        if (result == -1) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Doctor not found.");
+        } else {
+            return ResponseEntity.ok("Doctor updated successfully.");
+        }
+    }
+
+    // 8. Delete Doctor (Admin Only)
+    @DeleteMapping("/delete/{id}/{token}")
+    public ResponseEntity<?> deleteDoctor(@PathVariable Long id,
+                                          @PathVariable String token) {
+        if (!service.validateToken(token, "admin")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token for admin.");
+        }
+
+        int result = doctorService.deleteDoctor(id);
+        if (result == -1) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Doctor not found.");
+        } else {
+            return ResponseEntity.ok("Doctor deleted successfully.");
+        }
+    }
+
+    // 9. Filter Doctors
+    @GetMapping("/filter/{name}/{time}/{speciality}")
+    public ResponseEntity<?> filter(@PathVariable String name,
+                                    @PathVariable String time,
+                                    @PathVariable String speciality) {
+        return service.filterDoctor(name, time, speciality);
+    }
 }
+
