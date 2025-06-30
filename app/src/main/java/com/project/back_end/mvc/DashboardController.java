@@ -1,4 +1,4 @@
-package com.project.back_end.mvc;
+/*package com.project.back_end.mvc;
 
 public class DashboardController {
 
@@ -27,4 +27,38 @@ public class DashboardController {
 //    - If the token is invalid, redirects to the root URL.
 
 
+}*/
+package com.project.back_end.mvc;
+
+import com.project.back_end.services.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+@Controller
+public class DashboardController {
+
+    private final Service service;
+
+    // 2. Constructor-based Dependency Injection
+    @Autowired
+    public DashboardController(Service service) {
+        this.service = service;
+    }
+
+    // 3. Admin Dashboard Endpoint
+    @GetMapping("/adminDashboard/{token}")
+    public String adminDashboard(@PathVariable String token) {
+        boolean isValid = service.validateToken("admin", token);
+        return isValid ? "admin/adminDashboard" : "redirect:/";
+    }
+
+    // 4. Doctor Dashboard Endpoint
+    @GetMapping("/doctorDashboard/{token}")
+    public String doctorDashboard(@PathVariable String token) {
+        boolean isValid = service.validateToken("doctor", token);
+        return isValid ? "doctor/doctorDashboard" : "redirect:/";
+    }
 }
+
