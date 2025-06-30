@@ -12,3 +12,10 @@
  */
 
 export const API_BASE_URL = "http://localhost:8080";
+const ENV = process.env.NODE_ENV || "development";
+
+export const API_BASE_URL = {
+  development: "http://localhost:8080",
+  staging: "https://staging.hospitalcms.com",
+  production: "https://hospitalcms.com",
+}[ENV];
