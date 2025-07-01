@@ -54,7 +54,7 @@ public class Prescription {
 
 
 }*/
-package com.project.back_end.models;
+/*package com.project.back_end.models;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -146,5 +146,38 @@ public class Prescription {
     public void setDoctorNotes(String doctorNotes) {
         this.doctorNotes = doctorNotes;
     }
+}*/
+package com.project_back_end.model;
+
+import jakarta.persistence.*;
+
+@Entity
+public class Prescription {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String description;
+
+    @ManyToOne
+    private Appointment appointment;
+
+    public Prescription() {}
+
+    public Prescription(String description, Appointment appointment) {
+        this.description = description;
+        this.appointment = appointment;
+    }
+
+    // Getters and setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public Appointment getAppointment() { return appointment; }
+    public void setAppointment(Appointment appointment) { this.appointment = appointment; }
 }
+
 
