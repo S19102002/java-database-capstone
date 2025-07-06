@@ -102,7 +102,7 @@ and triggers modal-based login functionality.
     * Properly close all opened tags to complete the document structure.
 
  -->
- <!-- index.html -->
+/* <!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -161,5 +161,475 @@ and triggers modal-based login functionality.
 
   <!-- Page-Specific Logic -->
   <script type="module" src="../js/index.js"></script>
+</body>
+</html>
+*/
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hospital CMS Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      background-color: #f4f7f6;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #00695c;
+    }
+    .section {
+      margin: 20px;
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .bold { font-weight: bold; }
+    .italic { font-style: italic; }
+    .underline { text-decoration: underline; }
+    .bold-italic { font-weight: bold; font-style: italic; }
+    .bold-italic-underline { font-weight: bold; font-style: italic; text-decoration: underline; }
+    .red { color: red; }
+    .green { color: green; }
+    .blue { color: blue; }
+    .purple { color: purple; }
+    .orange { color: orange; }
+
+    table {
+      width: 90%;
+      margin: 0 auto 30px auto;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #555;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .filter-controls {
+      display: flex;
+      gap: 10px;
+      padding: 15px;
+      justify-content: center;
+      background: #e0f2f1;
+      flex-wrap: wrap;
+    }
+
+    .dashboard-content {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      padding: 20px;
+      justify-content: center;
+    }
+
+    .doctor-card {
+      background: #ffffff;
+      border: 1px solid #ddd;
+      padding: 15px;
+      width: 260px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .doctor-card h3 {
+      margin-top: 0;
+      color: #00796b;
+    }
+
+    .dashboard-btn {
+      background: #00796b;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+    }
+
+    .dashboard-btn:hover {
+      background: #004d40;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 500px;
+    }
+
+    footer {
+      background: #263238;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+    }
+
+    footer a {
+      color: #80deea;
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div id="header"></div>
+
+  <h1>Hospital CMS Dashboard</h1>
+
+  <section class="filter-controls">
+    <input type="text" id="searchBar" placeholder="Search doctor..." />
+    <select id="filterTime">
+      <option value="">Filter by Time</option>
+      <option value="09:00-10:00">09:00-10:00</option>
+      <option value="10:00-11:00">10:00-11:00</option>
+      <option value="11:00-12:00">11:00-12:00</option>
+      <option value="12:00-13:00">12:00-13:00</option>
+    </select>
+    <select id="filterSpecialty">
+      <option value="">Filter by Specialty</option>
+      <option value="cardiologist">Cardiologist</option>
+      <option value="dermatologist">Dermatologist</option>
+      <option value="neurologist">Neurologist</option>
+      <option value="pediatrician">Pediatrician</option>
+      <option value="orthopedic">Orthopedic</option>
+      <option value="gynecologist">Gynecologist</option>
+      <option value="psychiatrist">Psychiatrist</option>
+      <option value="dentist">Dentist</option>
+      <option value="ophthalmologist">Ophthalmologist</option>
+      <option value="ent">ENT Specialist</option>
+      <option value="urologist">Urologist</option>
+      <option value="oncologist">Oncologist</option>
+      <option value="gastroenterologist">Gastroenterologist</option>
+      <option value="general">General Physician</option>
+    </select>
+  </section>
+
+  <section class="dashboard-content" id="content">
+  <div class="doctor-card">
+    <div class="doctor-info">
+      <h3>Dr. Amit Verma</h3>
+      <p>Specialization: Cardiologist</p>
+      <p>Email: amit@hospital.com</p>
+      <p><strong>Location:</strong> Apollo Heart Centre, Delhi</p>
+      <p><strong>Bio:</strong> Dr. Verma has over 15 years of experience in treating complex cardiac disorders and performs more than 200 procedures annually.</p>
+      <ul><li>09:00</li><li>11:00</li><li>14:00</li></ul>
+    </div>
+    <div class="doctor-actions">
+      <button class="dashboard-btn">Book Now</button>
+    </div>
+  </div>
+
+  <div class="doctor-card">
+    <div class="doctor-info">
+      <h3>Dr. Sara Khan</h3>
+      <p>Specialization: Dermatologist</p>
+      <p>Email: sara@hospital.com</p>
+      <p><strong>Location:</strong> SkinCare Clinic, Mumbai</p>
+      <p><strong>Bio:</strong> A specialist in skin diseases, Dr. Khan is known for her holistic and evidence-based approach to skincare treatment.</p>
+      <ul><li>10:00</li><li>13:00</li><li>15:00</li></ul>
+    </div>
+    <div class="doctor-actions">
+      <button class="dashboard-btn">Book Now</button>
+    </div>
+  </div>
+
+  <div class="doctor-card">
+    <div class="doctor-info">
+      <h3>Dr. Rahul Mehra</h3>
+      <p>Specialization: Neurologist</p>
+      <p>Email: rahul@hospital.com</p>
+      <p><strong>Location:</strong> NeuroWell Centre, Kolkata</p>
+      <p><strong>Bio:</strong> Dr. Mehra is renowned for his research in neurodegenerative disorders and patient-centric neurological care.</p>
+      <ul><li>11:00</li><li>12:00</li><li>16:00</li></ul>
+    </div>
+    <div class="doctor-actions">
+      <button class="dashboard-btn">Book Now</button>
+    </div>
+  </div>
+
+  <div class="doctor-card">
+    <div class="doctor-info">
+      <h3>Dr. Priya Sharma</h3>
+      <p>Specialization: Pediatrician</p>
+      <p>Email: priya@hospital.com</p>
+      <p><strong>Location:</strong> Little Steps Child Clinic, Bengaluru</p>
+      <p><strong>Bio:</strong> With 10 years of experience, Dr. Sharma is a favorite among parents for her caring attitude and clinical acumen.</p>
+      <ul><li>09:30</li><li>10:30</li><li>13:30</li></ul>
+    </div>
+    <div class="doctor-actions">
+      <button class="dashboard-btn">Book Now</button>
+    </div>
+  </div>
+
+  <div class="doctor-card">
+    <div class="doctor-info">
+      <h3>Dr. Anil Kapoor</h3>
+      <p>Specialization: Orthopedic</p>
+      <p>Email: anil@hospital.com</p>
+      <p><strong>Location:</strong> Bone & Joint Hospital, Hyderabad</p>
+      <p><strong>Bio:</strong> Dr. Kapoor is widely respected for his success in knee and hip replacement surgeries, with 20+ years of experience.</p>
+      <ul><li>10:00</li><li>12:00</li><li>14:30</li></ul>
+    </div>
+    <div class="doctor-actions">
+      <button class="dashboard-btn">Book Now</button>
+    </div>
+  </div>
+
+  <div class="doctor-card">
+    <div class="doctor-info">
+      <h3>Dr. Meera Joshi</h3>
+      <p>Specialization: Gynecologist</p>
+      <p>Email: meera@hospital.com</p>
+      <p><strong>Location:</strong> Women's Wellness Clinic, Pune</p>
+      <p><strong>Bio:</strong> Dr. Joshi is a respected name in obstetrics and women’s reproductive health, known for her patient-first approach.</p>
+      <ul><li>11:00</li><li>13:00</li><li>15:00</li></ul>
+    </div>
+    <div class="doctor-actions">
+      <button class="dashboard-btn">Book Now</button>
+    </div>
+  </div>
+
+  <div class="doctor-card">
+    <div class="doctor-info">
+      <h3>Dr. Kabir Singh</h3>
+      <p>Specialization: Psychiatrist</p>
+      <p>Email: kabir@hospital.com</p>
+      <p><strong>Location:</strong> MindCare Institute, Lucknow</p>
+      <p><strong>Bio:</strong> Dr. Singh focuses on mental health awareness and therapy. His clinic is known for supportive and discreet treatment.</p>
+      <ul><li>09:00</li><li>11:00</li><li>13:00</li></ul>
+    </div>
+    <div class="doctor-actions">
+      <button class="dashboard-btn">Book Now</button>
+    </div>
+  </div>
+
+  <div class="doctor-card">
+    <div class="doctor-info">
+      <h3>Dr. Sneha Roy</h3>
+      <p>Specialization: Dentist</p>
+      <p>Email: sneha@hospital.com</p>
+      <p><strong>Location:</strong> SmileBright Dental Studio, Chennai</p>
+      <p><strong>Bio:</strong> With a gentle hand and precision skills, Dr. Roy is trusted for pain-free and aesthetic dental treatments.</p>
+      <ul><li>10:30</li><li>12:30</li><li>14:30</li></ul>
+    </div>
+    <div class="doctor-actions">
+      <button class="dashboard-btn">Book Now</button>
+    </div>
+  </div>
+
+  <div class="doctor-card">
+    <div class="doctor-info">
+      <h3>Dr. Arjun Das</h3>
+      <p>Specialization: ENT Specialist</p>
+      <p>Email: arjun@hospital.com</p>
+      <p><strong>Location:</strong> Harmony ENT Clinic, Ahmedabad</p>
+      <p><strong>Bio:</strong> Dr. Das treats patients with advanced ENT technology and has experience from global training centers.</p>
+      <ul><li>09:45</li><li>11:15</li><li>13:45</li></ul>
+    </div>
+    <div class="doctor-actions">
+      <button class="dashboard-btn">Book Now</button>
+    </div>
+  </div>
+
+  <div class="doctor-card">
+    <div class="doctor-info">
+      <h3>Dr. Rina Paul</h3>
+      <p>Specialization: General Physician</p>
+      <p>Email: rina@hospital.com</p>
+      <p><strong>Location:</strong> HealthFirst Clinic, Jaipur</p>
+      <p><strong>Bio:</strong> Dr. Paul provides primary care with an empathetic approach and manages a wide range of health conditions.</p>
+      <ul><li>10:00</li><li>12:00</li><li>15:00</li></ul>
+    </div>
+    <div class="doctor-actions">
+      <button class="dashboard-btn">Book Now</button>
+    </div>
+  </div>
+</section>
+
+
+
+
+<section class="dashboard-content" id="content">
+  <div id="charts" style="width: 100%; padding: 20px;">
+    <h2>Hospital Analytics</h2>
+    <div id="columnChart" class="section" style="height: 400px;"></div>
+    <div id="barChart" class="section" style="height: 400px;"></div>
+    <div id="lineChart" class="section" style="height: 400px;"></div>
+    <div id="bubbleMap" class="section" style="height: 500px;"></div>
+    <div id="treeMap" class="section" style="height: 500px;"></div>
+    <div id="heatMap" class="section" style="height: 400px;"></div>
+  </div>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script>
+    Plotly.newPlot('columnChart', [{
+      x: ['Cardiologist', 'Dermatologist', 'Neurologist', 'Pediatrician'],
+      y: [50, 40, 35, 45],
+      type: 'bar'
+    }], {
+      title: 'Patients Treated by Specialty',
+      xaxis: { title: 'Specialty' },
+      yaxis: { title: 'No. of Patients' }
+    });
+
+    Plotly.newPlot('barChart', [{
+      x: [120, 150, 90, 60],
+      y: ['Delhi', 'Mumbai', 'Kolkata', 'Bengaluru'],
+      type: 'bar',
+      orientation: 'h'
+    }], {
+      title: 'Appointments by City',
+      xaxis: { title: 'Appointments' },
+      yaxis: { title: 'City' }
+    });
+
+    Plotly.newPlot('lineChart', [{
+      x: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+      y: [300, 400, 350, 420, 390, 450],
+      type: 'scatter',
+      mode: 'lines+markers'
+    }], {
+      title: 'Monthly Appointment Trend',
+      xaxis: { title: 'Month' },
+      yaxis: { title: 'Appointments' }
+    });
+
+    Plotly.newPlot('bubbleMap', [{
+      type: 'scattergeo',
+      locationmode: 'country names',
+      lat: [28.61, 19.07, 22.57, 12.97],
+      lon: [77.20, 72.88, 88.36, 77.59],
+      text: ['Delhi', 'Mumbai', 'Kolkata', 'Bengaluru'],
+      marker: {
+        size: [40, 60, 35, 50],
+        color: [5, 6, 4, 5.5],
+        colorscale: 'Viridis',
+        colorbar: { title: 'Efficiency Score' },
+        sizemode: 'area'
+      }
+    }], {
+      title: 'City-wise Patient Distribution',
+      geo: {
+        scope: 'asia',
+        showland: true,
+        landcolor: 'rgb(217, 217, 217)'
+      }
+    });
+
+    Plotly.newPlot('treeMap', [{
+      type: 'treemap',
+      labels: ["Hospital", "Delhi", "Mumbai", "ENT", "Cardio", "Neuro"],
+      parents: ["", "Hospital", "Hospital", "Delhi", "Mumbai", "Mumbai"],
+      values: [0, 0, 0, 30, 40, 50],
+      textinfo: "label+value+percent parent"
+    }], {
+      title: "Doctor Specialties by City"
+    });
+
+    Plotly.newPlot('heatMap', [{
+      z: [
+        [4, 6, 2],
+        [7, 3, 5],
+        [6, 4, 8]
+      ],
+      x: ['Mon', 'Tue', 'Wed'],
+      y: ['Dr. Verma', 'Dr. Khan', 'Dr. Mehra'],
+      type: 'heatmap',
+      colorscale: 'Blues'
+    }], {
+      title: 'Doctor Availability Heatmap'
+    });
+  </script>
+</section>
+
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span id="closeModal" class="close">&times;</span>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <footer>
+    <div>
+      <img src="../assets/images/logo/logo.png" alt="Hospital CMS Logo" style="height: 40px;"><br>
+      <p>© 2025 Hospital CMS. All rights reserved.</p>
+      <div style="margin-top: 10px;">
+        <a href="#">About</a> | <a href="#">Careers</a> | <a href="#">Support</a> | <a href="#">Privacy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("closeModal").onclick = () => {
+      document.getElementById("modal").style.display = "none";
+    };
+
+    function renderHeader() {
+      const headerDiv = document.getElementById("header");
+      if (!headerDiv) return;
+
+      const role = localStorage.getItem("userRole");
+      const token = localStorage.getItem("token");
+
+      let headerContent = `<header class='header' style='background:#004d40;color:white;padding:15px;'>
+        <div class='logo-section' style='text-align:center;'>
+          <img src='../assets/images/logo/logo.png' alt='Hospital CMS Logo' class='logo-img' style='height:40px;'>
+          <span class='logo-title' style='margin-left:10px;font-size:1.5em;'>Hospital CMS</span>
+        </div>
+        <nav style='text-align:center;margin-top:10px;'>`;
+
+      if ((role === "loggedPatient" || role === "admin" || role === "doctor") && !token) {
+        localStorage.removeItem("userRole");
+        alert("Session expired or invalid login. Please log in again.");
+        window.location.href = "/";
+        return;
+      }
+
+      if (role === "admin") {
+        headerContent += `<button class='adminBtn'>Add Doctor</button><a href='#' onclick='logout()'>Logout</a>`;
+      } else if (role === "doctor") {
+        headerContent += `<button class='adminBtn'>Home</button><a href='#' onclick='logout()'>Logout</a>`;
+      } else if (role === "patient") {
+        headerContent += `<button class='adminBtn'>Login</button><button class='adminBtn'>Sign Up</button>`;
+      } else if (role === "loggedPatient") {
+        headerContent += `<button class='adminBtn'>Home</button><button class='adminBtn'>Appointments</button><a href='#' onclick='logoutPatient()'>Logout</a>`;
+      }
+
+      headerContent += `</nav></header>`;
+      headerDiv.innerHTML = headerContent;
+    }
+
+    function logout() {
+      localStorage.removeItem("userRole");
+      localStorage.removeItem("token");
+      window.location.href = "/";
+    }
+
+    function logoutPatient() {
+      localStorage.removeItem("userRole");
+      localStorage.removeItem("token");
+      window.location.href = "/pages/patientLogin.html";
+    }
+
+    renderHeader();
+  </script>
 </body>
 </html>
